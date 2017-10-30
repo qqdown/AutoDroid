@@ -1,7 +1,6 @@
 /*
 !.gitignore
 !/src
-!/tools
 !/libs
 !/.idea
 !ant.properties
@@ -10,3 +9,4 @@
 !build.xml
 !local.properties
 !project.properties
+.idea/workspace.xml
