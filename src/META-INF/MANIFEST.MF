@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Class-Path: . libs/org.apache.commons.net_3.2.0.v201305141515.jar
+Main-Class: edu.nju.autodroid.main.Main
+

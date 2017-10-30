@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="genymotion-api-1.0.2">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/libs/genymotion-api-1.0.2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

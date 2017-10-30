@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+    </content>
+    <orderEntry type="jdk" jdkName="1.8" jdkType="JavaSDK" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="ddmlib" level="project" />
+    <orderEntry type="library" name="common" level="project" />
+    <orderEntry type="library" name="guava-17.0" level="project" />
+    <orderEntry type="library" name="uiautomator" level="project" />
+    <orderEntry type="library" name="android" level="project" />
+    <orderEntry type="library" name="org.apache.commons.net_3.2.0.v201305141515" level="project" />
+    <orderEntry type="library" name="genymotion-api-1.0.2" level="project" />
+  </component>
+</module>
