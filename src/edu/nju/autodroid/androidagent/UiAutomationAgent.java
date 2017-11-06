@@ -4,6 +4,7 @@ import com.android.ddmlib.AdbCommandRejectedException;
 import com.android.ddmlib.IDevice;
 import com.android.ddmlib.ShellCommandUnresponsiveException;
 import com.android.ddmlib.TimeoutException;
+import com.sun.glass.events.KeyEvent;
 import edu.nju.autodroid.hierarchyHelper.AndroidWindow;
 import edu.nju.autodroid.hierarchyHelper.LayoutNode;
 import edu.nju.autodroid.uiautomator.Command;
@@ -15,6 +16,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.List;
+import java.util.UnknownFormatConversionException;
 
 /**
  * Created by ysht on 2017/10/30 0030.
@@ -165,11 +167,22 @@ public class UiAutomationAgent implements IAndroidAgent {
     @Override
     public void pressHome() {
 
+        try {
+            AdbTool.doKeyEvent(mDevice, android.view.KeyEvent.KEYCODE_HOME);
+        } catch (TimeoutException | AdbCommandRejectedException | IOException | ShellCommandUnresponsiveException e) {
+            e.printStackTrace();
+            return;
+        }
     }
 
     @Override
     public void pressBack() {
-
+        try {
+            AdbTool.doKeyEvent(mDevice, android.view.KeyEvent.KEYCODE_BACK);
+        } catch (TimeoutException | AdbCommandRejectedException | IOException | ShellCommandUnresponsiveException e) {
+            e.printStackTrace();
+            return;
+        }
     }
 
     @Override
@@ -241,56 +254,67 @@ public class UiAutomationAgent implements IAndroidAgent {
 
     @Override
     public boolean doClick(LayoutNode btn) {
-        return false;
+        if(btn == null)
+            return false;
+        int[] bound = btn.bound;
+        int x = (bound[0]+bound[2])/2;
+        int y = (bound[1]+bound[3])/2;
+        try {
+            AdbTool.doPress(mDevice, x, y);
+        } catch (TimeoutException | AdbCommandRejectedException | IOException | ShellCommandUnresponsiveException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
     }
 
     @Override
     public boolean doSetText(LayoutNode node, String content) {
-        return false;
+        throw new UnknownFormatConversionException("暂未实现该方法!");
     }
 
     @Override
     public boolean doLongClick(LayoutNode node) {
-        return false;
+        throw new UnknownFormatConversionException("暂未实现该方法!");
     }
 
     @Override
     public boolean doClickAndWaitForWindow(LayoutNode node) {
-        return false;
+        throw new UnknownFormatConversionException("暂未实现该方法!");
     }
 
     @Override
     public boolean doScrollBackward(LayoutNode node, int steps) {
-        return false;
+        throw new UnknownFormatConversionException("暂未实现该方法!");
     }
 
     @Override
     public boolean doScrollForward(LayoutNode node, int steps) {
-        return false;
+        throw new UnknownFormatConversionException("暂未实现该方法!");
     }
 
     @Override
     public boolean doScrollToEnd(LayoutNode node, int maxSwipes, int steps) {
-        return false;
+        throw new UnknownFormatConversionException("暂未实现该方法!");
     }
 
     @Override
     public boolean doScrollToBeginning(LayoutNode node, int maxSwipes, int steps) {
-        return false;
+        throw new UnknownFormatConversionException("暂未实现该方法!");
     }
 
     @Override
     public boolean doScrollIntoView(LayoutNode node, LayoutNode viewObj) {
-        return false;
+        throw new UnknownFormatConversionException("暂未实现该方法!");
     }
 
     @Override
     public boolean doSwipeToLeft(LayoutNode node) {
-        return false;
+        throw new UnknownFormatConversionException("暂未实现该方法!");
     }
 
     @Override
     public boolean doSwipeToRight(LayoutNode node) {
-        return false;
+        throw new UnknownFormatConversionException("暂未实现该方法!");
     }
 }

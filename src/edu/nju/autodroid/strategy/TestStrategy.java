@@ -9,7 +9,7 @@ import java.util.Timer;
 /**
  * Created by ysht on 2017/11/6 0006.
  */
-public class TestTrategy implements IStrategy {
+public class TestStrategy implements IStrategy {
 
     protected IAndroidAgent agent;
 
@@ -28,7 +28,7 @@ public class TestTrategy implements IStrategy {
         return "????????????????why";
     }
 
-    public  TestTrategy(IAndroidAgent agent){
+    public TestStrategy(IAndroidAgent agent){
         this.agent = agent;
     }
 

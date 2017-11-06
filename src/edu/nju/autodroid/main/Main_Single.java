@@ -1,15 +1,11 @@
 package edu.nju.autodroid.main;
 
 import com.android.ddmlib.*;
-import edu.nju.autodroid.androidagent.AdbAgent;
 import edu.nju.autodroid.androidagent.IAndroidAgent;
 import edu.nju.autodroid.androidagent.UiAutomationAgent;
 import edu.nju.autodroid.strategy.*;
-import edu.nju.autodroid.uiautomator.UiautomatorClient;
 import edu.nju.autodroid.utils.AdbTool;
-import edu.nju.autodroid.utils.Configuration;
 import edu.nju.autodroid.utils.Logger;
-import edu.nju.autodroid.utils.UiAutomatorTool;
 
 import java.io.File;
 import java.io.IOException;
@@ -65,7 +61,7 @@ public class Main_Single {
 
                 if(!laubchableActivity.endsWith("/")) {
                     String apkName = apkFile.getName().substring(0, apkFile.getName().lastIndexOf('.'));
-                    IStrategy strategy = new TestTrategy(agent);//new DepthGroupWeightedStrategy(agent, Configuration.getMaxStep(), laubchableActivity, new Logger(apkName, "logger_output\\" + apkName + ".txt"));//"com.financial.calculator/.FinancialCalculators"
+                    IStrategy strategy = new TestStrategy(agent);//new DepthGroupWeightedStrategy(agent, Configuration.getMaxStep(), laubchableActivity, new Logger(apkName, "logger_output\\" + apkName + ".txt"));//"com.financial.calculator/.FinancialCalculators"
                     Logger.logInfo("Start Strategy：" + strategy.getStrategyName());
                     Logger.logInfo("Strategy target：" + apkFilePath);
                     try{
