@@ -5,12 +5,16 @@ import com.android.ddmlib.IDevice;
 import com.android.ddmlib.ShellCommandUnresponsiveException;
 import com.android.ddmlib.TimeoutException;
 import com.sun.glass.events.KeyEvent;
+import com.sun.webkit.ThemeClient;
 import edu.nju.autodroid.hierarchyHelper.AndroidWindow;
 import edu.nju.autodroid.hierarchyHelper.LayoutNode;
 import edu.nju.autodroid.uiautomator.Command;
 import edu.nju.autodroid.utils.AdbTool;
+import edu.nju.autodroid.utils.CmdExecutor;
+import edu.nju.autodroid.utils.Configuration;
 import edu.nju.autodroid.utils.Logger;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -22,6 +26,9 @@ import java.util.UnknownFormatConversionException;
  * Created by ysht on 2017/10/30 0030.
  */
 public class UiAutomationAgent implements IAndroidAgent {
+
+    private static final String dex = Configuration.getDexPath();
+    private static final String adb = Configuration.getADBPath();
 
     private Socket mSocket;
 
@@ -39,8 +46,10 @@ public class UiAutomationAgent implements IAndroidAgent {
 
     @Override
     public boolean init() {
+        startUiViewer();
 
         try {
+            Thread.sleep(1000);
             mDevice.createForward(localPort, phonePort);
             mSocket = new Socket("localhost", localPort);
             Logger.logInfo("UiAutomationAgent init成功！");
@@ -49,9 +58,40 @@ public class UiAutomationAgent implements IAndroidAgent {
             Logger.logInfo("UiAutomationAgent init失败！");
         } catch (TimeoutException | AdbCommandRejectedException e) {
             e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
         return false;
+    }
+
+    private void startUiViewer(){
+        try {
+
+            int taskId = AdbTool.getTaskId(mDevice, "/system/bin/app_process");
+            if(taskId < 0) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        CmdExecutor.execCmd(adb + " push /tools/uiviewer/UiViewer.jar /sdcard/");
+                        CmdExecutor.execCmd(adb + " shell CLASSPATH=/sdcard/UiViewer.jar /system/bin/app_process /sdcard/ edu.nju.uiviewer.Main");
+                    }
+                }).start();
+                while (taskId < 0)
+                {
+                    Thread.sleep(500);
+                    Logger.logInfo("等待Uiviewer启动");
+                    taskId = AdbTool.getTaskId(mDevice, "/system/bin/app_process");
+
+                }
+
+            }
+        } catch (TimeoutException | AdbCommandRejectedException | IOException | ShellCommandUnresponsiveException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public void sendCommand(Command cmd){
