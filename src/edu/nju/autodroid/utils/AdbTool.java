@@ -608,6 +608,23 @@ public class AdbTool {
         });
     }
 
+    public static void doKeyEvent(IDevice device, int keyCode) throws TimeoutException, AdbCommandRejectedException, ShellCommandUnresponsiveException, IOException {
+        if(device == null)
+        {
+            Logger.logError("设备为空！");
+            return;
+        }
+
+        device.executeShellCommand(String.format("input keyevent %d", keyCode), new  IShellOutputReceiver() {
+            @Override
+            public void addOutput(byte[] arg0, int arg1, int arg2) {}
+            @Override
+            public void flush() {}
+            @Override
+            public boolean isCancelled() {return false;}
+        });
+    }
+
     /**
      * 长按操作 有问题，4.4一下系统不可用
      * @param device 设备
