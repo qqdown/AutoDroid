@@ -65,6 +65,11 @@ public class Configuration {
         return toLegalPath(path);
     }
 
+    public static String getDexPath(){
+        String path = getProperty("dex_path");
+        return toLegalPath(path);
+    }
+
     public static String getAndroidPath()
     {
         String path;

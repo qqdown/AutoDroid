@@ -10,3 +10,4 @@
 !local.properties
 !project.properties
 .idea/workspace.xml
+!/tools/uiviewer
