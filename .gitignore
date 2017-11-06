@@ -3,6 +3,7 @@
 !/src
 !/libs
 !/.idea
+!/tools/uiviewer
 !ant.properties
 !*.iml
 !autodroid.properties
@@ -10,4 +11,3 @@
 !local.properties
 !project.properties
 .idea/workspace.xml
-!/tools/uiviewer
