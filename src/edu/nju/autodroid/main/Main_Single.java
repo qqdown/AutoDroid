@@ -3,10 +3,8 @@ package edu.nju.autodroid.main;
 import com.android.ddmlib.*;
 import edu.nju.autodroid.androidagent.AdbAgent;
 import edu.nju.autodroid.androidagent.IAndroidAgent;
-import edu.nju.autodroid.strategy.DepthGroupWeightedStrategy;
-import edu.nju.autodroid.strategy.GroupWeightedSelectionStrategy;
-import edu.nju.autodroid.strategy.IStrategy;
-import edu.nju.autodroid.strategy.PagedWindowWeightSelectionStrategy;
+import edu.nju.autodroid.androidagent.UiAutomationAgent;
+import edu.nju.autodroid.strategy.*;
 import edu.nju.autodroid.uiautomator.UiautomatorClient;
 import edu.nju.autodroid.utils.AdbTool;
 import edu.nju.autodroid.utils.Configuration;
@@ -46,28 +44,12 @@ public class Main_Single {
             List<String> finishedList = Main.getFinishedList("finishedList.txt");
             if(finishedList.contains(apkFilePath))
                 continue;
-            int uiautomatorTaskId = AdbTool.getTaskId(device, "uiautomator");
-            if(uiautomatorTaskId > 0)
-                AdbTool.killTask(device, uiautomatorTaskId);
-            Thread.sleep(2000);
-            if(AdbTool.getTaskId(device, "uiautomator") < 0) {//如果uiautomator没有启动
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        UiautomatorClient.start(device.getSerialNumber(), UiautomatorClient.PHONE_PORT);
-                    }
-                }).start();
-            }
-            while (AdbTool.getTaskId(device, "uiautomator") < 0){//等待uiautomator
-                Logger.logInfo("Waiting for Uiautomator...");
-                Thread.sleep(1000);
-            }
-            Logger.logInfo("UiAutomator start successfully!");
+
 
 
 
             File apkFile = new File(apkFilePath);
-            IAndroidAgent agent = new AdbAgent(device, UiautomatorClient.PHONE_PORT, UiautomatorClient.PHONE_PORT);
+            IAndroidAgent agent = new UiAutomationAgent(device, 22233, 22233);//new AdbAgent(device, UiautomatorClient.PHONE_PORT, UiautomatorClient.PHONE_PORT);
             boolean result;
             result = agent.init();
             Logger.logInfo("Init agent："+result);
@@ -83,7 +65,7 @@ public class Main_Single {
 
                 if(!laubchableActivity.endsWith("/")) {
                     String apkName = apkFile.getName().substring(0, apkFile.getName().lastIndexOf('.'));
-                    IStrategy strategy = new DepthGroupWeightedStrategy(agent, Configuration.getMaxStep(), laubchableActivity, new Logger(apkName, "logger_output\\" + apkName + ".txt"));//"com.financial.calculator/.FinancialCalculators"
+                    IStrategy strategy = new TestTrategy(agent);//new DepthGroupWeightedStrategy(agent, Configuration.getMaxStep(), laubchableActivity, new Logger(apkName, "logger_output\\" + apkName + ".txt"));//"com.financial.calculator/.FinancialCalculators"
                     Logger.logInfo("Start Strategy：" + strategy.getStrategyName());
                     Logger.logInfo("Strategy target：" + apkFilePath);
                     try{
@@ -110,9 +92,7 @@ public class Main_Single {
             finishedList.add(apkFilePath);
             Main.setFinishedList("finishedList.txt", finishedList);
 
-            uiautomatorTaskId = AdbTool.getTaskId(device, "uiautomator");
-            if(uiautomatorTaskId > 0)
-                AdbTool.killTask(device, uiautomatorTaskId);
+
             Thread.sleep(2000);
         }
 

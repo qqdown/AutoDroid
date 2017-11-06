@@ -6,6 +6,7 @@ import com.android.ddmlib.ShellCommandUnresponsiveException;
 import com.android.ddmlib.TimeoutException;
 import edu.nju.autodroid.hierarchyHelper.AndroidWindow;
 import edu.nju.autodroid.hierarchyHelper.LayoutNode;
+import edu.nju.autodroid.uiautomator.UiautomatorClient;
 import edu.nju.autodroid.utils.AdbTool;
 import edu.nju.autodroid.utils.Logger;
 import edu.nju.autodroid.utils.UiAutomatorTool;
@@ -35,6 +36,31 @@ public class UiAutomatorAndroidAgent implements IAndroidAgent {
         result = AdbTool.initializeBridge();
         if(!result)
             return false;
+
+        //启动uiautomator
+        try {
+            int uiautomatorTaskId = AdbTool.getTaskId(device, "uiautomator");
+            if (uiautomatorTaskId > 0)
+                AdbTool.killTask(device, uiautomatorTaskId);
+            Thread.sleep(2000);
+            if (AdbTool.getTaskId(device, "uiautomator") < 0) {//如果uiautomator没有启动
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        UiautomatorClient.start(device.getSerialNumber(), UiautomatorClient.PHONE_PORT);
+                    }
+                }).start();
+            }
+            while (AdbTool.getTaskId(device, "uiautomator") < 0) {//等待uiautomator
+                Logger.logInfo("Waiting for Uiautomator...");
+                Thread.sleep(1000);
+            }
+            Logger.logInfo("UiAutomator start successfully!");
+        }catch (Exception ex){
+            ex.printStackTrace();
+            return false;
+        }
+
         //初始化uiautomator
         result = uiautomator.initializeConnection(device, localPort, phonePort);
         return result;
@@ -43,6 +69,16 @@ public class UiAutomatorAndroidAgent implements IAndroidAgent {
     @Override
     public void terminate() {
         uiautomator.terminateConnection();
+
+        //关闭uiautomator
+        int uiautomatorTaskId = 0;
+        try {
+            uiautomatorTaskId = AdbTool.getTaskId(device, "uiautomator");
+            if(uiautomatorTaskId > 0)
+                AdbTool.killTask(device, uiautomatorTaskId);
+        } catch (TimeoutException | AdbCommandRejectedException | IOException | ShellCommandUnresponsiveException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

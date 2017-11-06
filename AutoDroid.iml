@@ -14,5 +14,6 @@
     <orderEntry type="library" name="android" level="project" />
     <orderEntry type="library" name="org.apache.commons.net_3.2.0.v201305141515" level="project" />
     <orderEntry type="library" name="genymotion-api-1.0.2" level="project" />
+    <orderEntry type="library" name="classes-full-debug" level="project" />
   </component>
 </module>
