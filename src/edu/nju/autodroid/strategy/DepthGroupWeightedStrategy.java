@@ -150,6 +150,11 @@ public class DepthGroupWeightedStrategy implements IStrategy {
                     doAction(action);
                     GL<Group> gl_p = gl;
                     gl = getCurrentGL();
+                    if(gl == null)
+                    {
+                        androidAgent.pressHome();
+                        continue;
+                    }
                     //gl_p和gl是同一个group，那么深度不变,如果该group深度为-1（还未初始化），则置为depth
                     //否则，深度加1
                     if (!gl_p.G.getId().equals(gl.G.getId())) {
@@ -301,15 +306,15 @@ public class DepthGroupWeightedStrategy implements IStrategy {
         }
         String layoutXML = androidAgent.getLayout();
         LayoutTree lt = null;
-        while(lt == null){
-            while(layoutXML == null || layoutXML.isEmpty()){
-                Logger.logInfo(androidAgent.getDevice().getSerialNumber() + " Waiting for layout。。。");
+        int count = 3;
+        while(lt == null && count-->=0){
+            if (layoutXML == null || layoutXML.isEmpty()) {
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                layoutXML = androidAgent.getLayout();
+                continue;
             }
 
             LayoutTree layoutTree = new LayoutTree(layoutXML);
@@ -332,6 +337,8 @@ public class DepthGroupWeightedStrategy implements IStrategy {
         if(androidAgent.getRuntimePackage().equals(runtimePackage)) {
             Group newGroup = new Group(new Date().getTime() + "");
             LayoutTree lc = getCurrentLayout(androidAgent);
+            if(lc == null)
+                return null;
             gl = getSimilaryLayout(lc);
             if (gl.G == null) {
                 gl.G = newGroup;

@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.Date;
 import java.util.List;
 import java.util.UnknownFormatConversionException;
 
@@ -142,8 +143,13 @@ public class UiAutomationAgent implements IAndroidAgent {
     @Override
     public String getFocusedActivity() {
         try {
-            return AdbTool.getFocusedActivity(mDevice);
-        } catch (TimeoutException | AdbCommandRejectedException | ShellCommandUnresponsiveException | IOException e) {
+            String activity = AdbTool.getFocusedActivity(mDevice);
+            while (activity == null){
+                activity = AdbTool.getFocusedActivity(mDevice);
+                Thread.sleep(500);
+            }
+            return activity;
+        } catch (TimeoutException | AdbCommandRejectedException | ShellCommandUnresponsiveException | IOException | InterruptedException e) {
             e.printStackTrace();
         }
         return null;
@@ -226,10 +232,29 @@ public class UiAutomationAgent implements IAndroidAgent {
         Command cmd = new Command();
         cmd.cmd = Command.cmdGetLayout;
         sendCommand(cmd);
-        cmd = receiveCommand();
-        if(cmd.cmd != Command.cmdGetLayout)
+        Command[] receivedCmd = new Command[1];
+
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                receivedCmd[0] = receiveCommand();
+            }
+        });
+        thread.start();
+        Date dt = new Date();
+        while (receivedCmd[0] == null && (new Date().getTime() - dt.getTime() <= 100000)){//100秒没反应
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        thread = null;
+        if(receivedCmd[0] == null)
             return null;
-        return cmd.params[0];
+        if(receivedCmd[0].cmd != Command.cmdGetLayout)
+            return null;
+        return receivedCmd[0].params[0];
     }
 
     @Override
