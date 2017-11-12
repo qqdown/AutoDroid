@@ -5,6 +5,7 @@ import edu.nju.autodroid.utils.Logger;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
+import javax.rmi.CORBA.Util;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -90,6 +91,42 @@ public class LayoutTree {
 
         int editDis = Utils.EditDistance(getTreeBFSHashes(), layoutTree.getTreeBFSHashes());
         return 1.0-editDis*1.0/Math.max(root.getTotalChildrenCount(),layoutTree.getTreeSize());
+    }
+
+    public double similarityWith(LayoutTree layoutTree, LayoutSimilarityAlgorithm algorithm){
+        switch (algorithm){
+            case BFSThenEditdistane:
+                return similarityWith(layoutTree);
+            case RectArea:
+                return similarityWithByRectArea(layoutTree);
+            default:
+                throw new UnsupportedOperationException("不支持的相似度计算算法");
+        }
+    }
+
+    protected double similarityWithByRectArea(LayoutTree layoutTree){
+        List<LayoutNode> nodes1 = findAll(new Predicate<LayoutNode>() {
+            @Override
+            public boolean test(LayoutNode node) {
+                return true;
+            }
+        }, TreeSearchOrder.BoardFirst);
+        List<LayoutNode> nodes2 = layoutTree.findAll(new Predicate<LayoutNode>() {
+            @Override
+            public boolean test(LayoutNode node) {
+                return true;
+            }
+        }, TreeSearchOrder.BoardFirst);
+        int maxSize = Math.max(nodes1.size(), nodes2.size());
+        double[][] weight = new double[maxSize][maxSize];
+        int[] match = new int[maxSize];
+        for(int i=0; i<nodes1.size(); i++){
+            for(int j=0; j<nodes2.size(); j++){
+                weight[i][j] = Utils.getNormalizedOverlapArea(nodes1.get(i).bound, nodes2.get(j).bound);
+            }
+        }
+        double sim = Utils.biGraph(true, weight, match)*1.0/Math.min(nodes1.size(), nodes2.size());
+        return sim;
     }
 
     protected Integer[] getTreeBFSHashes(){

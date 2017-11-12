@@ -53,16 +53,12 @@ public class UiAutomationAgent implements IAndroidAgent {
             mDevice.createForward(localPort, phonePort);
             mSocket = new Socket("localhost", localPort);
             Logger.logInfo("UiAutomationAgent init成功！");
-        } catch (IOException e) {
+            return true;
+        } catch (IOException|TimeoutException | AdbCommandRejectedException | InterruptedException e) {
             e.printStackTrace();
             Logger.logInfo("UiAutomationAgent init失败！");
-        } catch (TimeoutException | AdbCommandRejectedException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            return false;
         }
-
-        return false;
     }
 
     private void startUiViewer(){
@@ -73,7 +69,7 @@ public class UiAutomationAgent implements IAndroidAgent {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        CmdExecutor.execCmd(adb + " push /tools/uiviewer/UiViewer.jar /sdcard/");
+                        CmdExecutor.execCmd(adb + " push tools/uiviewer/UiViewer.jar /sdcard/");
                         CmdExecutor.execCmd(adb + " shell CLASSPATH=/sdcard/UiViewer.jar /system/bin/app_process /sdcard/ edu.nju.uiviewer.Main");
                     }
                 }).start();

@@ -6,7 +6,6 @@
 !/tools/uiviewer
 !ant.properties
 !*.iml
-!autodroid.properties
 !build.xml
 !local.properties
 !project.properties

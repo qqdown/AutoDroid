@@ -35,7 +35,7 @@ public class DepthGroupWeightedStrategy implements IStrategy {
     private Logger actionLogger = null;
     private  int lastGraphVetexCount = 0;
     private  int lastGraphEdgeCount = 0;
-    private int MaxDepth = 1;
+    private int MaxDepth = 2;
 
 
     public int MaxNoChangCount = 200;
@@ -338,7 +338,7 @@ public class DepthGroupWeightedStrategy implements IStrategy {
                 gl.L = lc;
                 newGroup.addLayout(lc);
             } else {
-                double sim = lc.similarityWith(gl.L);
+                double sim = lc.similarityWith(gl.L, LayoutSimilarityAlgorithm.RectArea);
                 if (sim >= 0.99) {
                     return gl;
                 } else if (sim >= 0.8) {
@@ -364,7 +364,7 @@ public class DepthGroupWeightedStrategy implements IStrategy {
         GL gl = new GL();
         for(Group win : groupTransaction.getWindows()){
             for(LayoutTree l :win.getLayouts()){
-                double sim = l.similarityWith(lc);
+                double sim = l.similarityWith(lc, LayoutSimilarityAlgorithm.RectArea);
                 if(sim>max){
                     gl.L = l;
                     gl.G = win;
