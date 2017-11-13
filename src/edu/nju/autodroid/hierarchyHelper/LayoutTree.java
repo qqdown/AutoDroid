@@ -125,7 +125,7 @@ public class LayoutTree {
                 weight[i][j] = Utils.getNormalizedOverlapArea(nodes1.get(i).bound, nodes2.get(j).bound);
             }
         }
-        double sim = Utils.biGraph(true, weight, match)*1.0/Math.min(nodes1.size(), nodes2.size());
+        double sim = Utils.biGraph(true, weight, match)*1.0/Math.max(nodes1.size(), nodes2.size());
         return sim;
     }
 

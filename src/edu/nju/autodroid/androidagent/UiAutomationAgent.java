@@ -144,10 +144,14 @@ public class UiAutomationAgent implements IAndroidAgent {
     public String getFocusedActivity() {
         try {
             String activity = AdbTool.getFocusedActivity(mDevice);
-            while (activity == null){
+            int count = 4;
+            while (activity == null && count-->=0){
                 activity = AdbTool.getFocusedActivity(mDevice);
+                Logger.logInfo("waiting for getFocusedActivity");
                 Thread.sleep(500);
             }
+            if(activity == null)
+                return "com.android.launcher3/.Launcher";//如果长时间获取不到activity，我们认为是在桌面
             return activity;
         } catch (TimeoutException | AdbCommandRejectedException | ShellCommandUnresponsiveException | IOException | InterruptedException e) {
             e.printStackTrace();

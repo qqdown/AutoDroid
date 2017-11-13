@@ -296,7 +296,7 @@ public class AdbTool {
         final String[] result = new String[1];
         result[0] = null;
         if(device != null) {
-            device.executeShellCommand("dumpsys activity | grep mFocusedActivity", new IShellOutputReceiver() {
+            device.executeShellCommand("dumpsys activity activities | grep mFocusedActivity", new IShellOutputReceiver() {
                 @Override
                 public boolean isCancelled() {return false;}
                 @Override

@@ -35,7 +35,8 @@ public class DepthGroupWeightedStrategy implements IStrategy {
     private Logger actionLogger = null;
     private  int lastGraphVetexCount = 0;
     private  int lastGraphEdgeCount = 0;
-    private int MaxDepth = 2;
+    private int MaxDepth = 1;
+    private double layoutSimThreashold = 0.9;
 
 
     public int MaxNoChangCount = 200;
@@ -109,7 +110,7 @@ public class DepthGroupWeightedStrategy implements IStrategy {
                 if(gl.L == null){
                     action.actionType = Action.ActionType.NoAction;
                 }
-                else if(gl.G.getDepth() > MaxDepth){// else if(getAppWindow().size() > MaxDepth){//这里是设置深度的地方！！！//
+                else if(gl.G.getDepth() >= MaxDepth){// else if(getAppWindow().size() > MaxDepth){//这里是设置深度的地方！！！//
                     action.actionType = Action.ActionType.Back;
                     //androidAgent.stopApplication(runtimePackage);
                     //Thread.sleep(1000);
@@ -179,7 +180,7 @@ public class DepthGroupWeightedStrategy implements IStrategy {
                             gl_p.G.setDepth(depth);
                         }
                     }
-                    if(depth <= 3)
+                    if(depth <= MaxDepth)
                         groupTransaction.addTransaction(gl_p.G.getId(), gl.G.getId(), action);
                     else{
                         androidAgent.stopApplication(runtimePackage);
@@ -205,6 +206,9 @@ public class DepthGroupWeightedStrategy implements IStrategy {
                 }
                 if(tryStayingCurrentApplication()){
                     gl = getCurrentGL();
+                    if(gl.G.getDepth()<0){
+                        System.out.println("error depth");
+                    }
                 }else{
                     Logger.logInfo(androidAgent.getDevice().getSerialNumber() + " 已经跳出当前package");
                     return false;
@@ -348,7 +352,7 @@ public class DepthGroupWeightedStrategy implements IStrategy {
                 double sim = lc.similarityWith(gl.L, LayoutSimilarityAlgorithm.RectArea);
                 if (sim >= 0.99) {
                     return gl;
-                } else if (sim >= 0.8) {
+                } else if (sim >= layoutSimThreashold) {
                     MergeWeight(gl.L, lc);
                     gl.G.addLayout(lc);
                 } else {
