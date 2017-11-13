@@ -26,7 +26,7 @@ import java.util.function.Predicate;
 public class DepthGroupWeightedStrategy implements IStrategy {
     private GroupTransaction groupTransaction = new GroupTransaction();
 
-    //test
+    //asdf
     protected String runtimePackage;
     protected IAndroidAgent androidAgent;
     private Action lastAction = null;
