@@ -4,6 +4,13 @@
     <exclude-output />
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+      <excludeFolder url="file://$MODULE_DIR$/logger_output" />
+      <excludeFolder url="file://$MODULE_DIR$/logger_output_repdroid_hybirdtest" />
+      <excludeFolder url="file://$MODULE_DIR$/logger_output_混合_矩形" />
+      <excludeFolder url="file://$MODULE_DIR$/logger_output_矩形相似" />
+      <excludeFolder url="file://$MODULE_DIR$/strategy_output_repdroid_hybirdtest" />
+      <excludeFolder url="file://$MODULE_DIR$/strategy_output_混合_矩形" />
+      <excludeFolder url="file://$MODULE_DIR$/strategy_output_矩形相似" />
     </content>
     <orderEntry type="jdk" jdkName="1.8" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
@@ -15,5 +22,10 @@
     <orderEntry type="library" name="org.apache.commons.net_3.2.0.v201305141515" level="project" />
     <orderEntry type="library" name="genymotion-api-1.0.2" level="project" />
     <orderEntry type="library" name="classes-full-debug" level="project" />
+    <orderEntry type="library" name="rtree-0.8.0.4" level="project" />
+    <orderEntry type="library" name="rxjava-2.1.8" level="project" />
+    <orderEntry type="library" name="rxjava-1.3.4" level="project" />
+    <orderEntry type="library" name="guava-mini-0.1.1" level="project" />
+    <orderEntry type="library" name="jgrapht-core-1.1.0" level="project" />
   </component>
 </module>

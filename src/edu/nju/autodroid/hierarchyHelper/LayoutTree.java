@@ -1,9 +1,20 @@
 package edu.nju.autodroid.hierarchyHelper;
 
+import com.github.davidmoten.rtree.Entries;
+import com.github.davidmoten.rtree.Entry;
+import com.github.davidmoten.rtree.RTree;
+import com.github.davidmoten.rtree.geometry.Geometries;
+import com.github.davidmoten.rtree.geometry.Rectangle;
 import edu.nju.autodroid.utils.Utils;
 import edu.nju.autodroid.utils.Logger;
+import org.jgrapht.alg.interfaces.MatchingAlgorithm;
+import org.jgrapht.alg.matching.MaximumWeightBipartiteMatching;
+import org.jgrapht.graph.ClassBasedEdgeFactory;
+import org.jgrapht.graph.DefaultWeightedEdge;
+import org.jgrapht.graph.SimpleWeightedGraph;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
+import rx.functions.Action1;
 
 import javax.rmi.CORBA.Util;
 import javax.xml.parsers.DocumentBuilder;
@@ -11,10 +22,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -32,6 +40,9 @@ public class LayoutTree {
     private List<LayoutNode> findList = new ArrayList<LayoutNode>();
 
     private int totalChildrenCountBeforeCompress = 0;
+
+    //用于rect area相似度判断的R树。会在第一次使用的时候创建。
+    private RTree<LayoutNode, Rectangle> layoutRTree = null;
 
     public LayoutTree(String layoutXML){
         root = new LayoutNode();
@@ -99,12 +110,74 @@ public class LayoutTree {
                 return similarityWith(layoutTree);
             case RectArea:
                 return similarityWithByRectArea(layoutTree);
+            case RegionRatio:
+                return similarityWithByRegionRatio(layoutTree);
             default:
                 throw new UnsupportedOperationException("不支持的相似度计算算法");
         }
     }
 
     protected double similarityWithByRectArea(LayoutTree layoutTree){
+        if(layoutRTree == null){
+            createRTree();
+        }
+
+        if(layoutTree.layoutRTree == null){
+            layoutTree.createRTree();
+        }
+        double[] tsim = new double[1];
+        int[] count = new int[1];
+        layoutTree.layoutRTree.entries().subscribe(new Action1<Entry<LayoutNode, Rectangle>>() {
+            @Override
+            public void call(Entry<LayoutNode, Rectangle> otherEntry) {
+                //对每个，查找覆盖的元素
+                double[] maxSim = new double[]{0};
+                layoutRTree.search(otherEntry.geometry()).subscribe(new Action1<Entry<LayoutNode, Rectangle>>() {
+                    @Override
+                    public void call(Entry<LayoutNode, Rectangle> myEntry) {
+                        //找到有重叠的区域，那么则计算覆盖率
+                        double sim = Utils.getNormalizedOverlapArea(myEntry.value().bound, otherEntry.value().bound);
+                        if(sim > maxSim[0])
+                            maxSim[0] = sim;
+                    }
+                });
+                tsim[0] += maxSim[0];
+                count[0] += 1;
+            }
+        });
+
+        if(count[0]== 0)
+            return 0;
+
+        return tsim[0]/count[0];
+    }
+
+    //不对layoutRTree是否为空进行判断。直接生成新的RTree赋给layoutRTree
+    protected RTree createRTree(){
+        layoutRTree = RTree.create();
+        List<LayoutNode> leafLayoutNode = findAll(new Predicate<LayoutNode>() {
+            @Override
+            public boolean test(LayoutNode node) {
+                return node.getChildrenCount() == 0;
+            }
+        }, TreeSearchOrder.DepthFirst);
+
+        List<Entry<LayoutNode, Rectangle>> entryList = new ArrayList<Entry<LayoutNode, Rectangle>>();
+        for(LayoutNode n : leafLayoutNode){
+            int x1, x2, y1, y2;
+            x1 = Math.min(n.bound[0], n.bound[2]);
+            x2 = Math.max(n.bound[0], n.bound[2]);
+            y1 = Math.min(n.bound[1], n.bound[3]);
+            y2 = Math.max(n.bound[1], n.bound[3]);
+            entryList.add(Entries.entry(n, Geometries.rectangle(x1,y1,x2,y2)));
+        }
+
+        layoutRTree = layoutRTree.add(entryList);
+        return layoutRTree;
+    }
+
+    //通过二分图匹配算的图的相似度。速度太慢了。。。
+    protected double similarityWithByRectArea2(LayoutTree layoutTree){
         List<LayoutNode> nodes1 = findAll(new Predicate<LayoutNode>() {
             @Override
             public boolean test(LayoutNode node) {
@@ -127,6 +200,49 @@ public class LayoutTree {
         }
         double sim = Utils.biGraph(true, weight, match)*1.0/Math.max(nodes1.size(), nodes2.size());
         return sim;
+    }
+
+    //先将每个控件按照面积排序，然后用二分图匹配，权值就是面积比（小/大）
+    protected double similarityWithByRegionRatio(LayoutTree layoutTree) {
+        SimpleWeightedGraph<LayoutNode, DefaultWeightedEdge> biPartitieGraph = new SimpleWeightedGraph<LayoutNode, DefaultWeightedEdge>(new ClassBasedEdgeFactory<LayoutNode, DefaultWeightedEdge>(DefaultWeightedEdge.class));
+        List<LayoutNode> nodes1 = findAll(new Predicate<LayoutNode>() {
+            @Override
+            public boolean test(LayoutNode node) {
+                if(node.getChildrenCount() == 0) {
+                    biPartitieGraph.addVertex(node);
+                    return true;
+                }
+                return false;
+            }
+        }, TreeSearchOrder.BoardFirst);
+        List<LayoutNode> nodes2 = layoutTree.findAll(new Predicate<LayoutNode>() {
+            @Override
+            public boolean test(LayoutNode node) {
+                if(node.getChildrenCount() == 0) {
+                    biPartitieGraph.addVertex(node);
+                    return true;
+                }
+                return false;
+            }
+        }, TreeSearchOrder.BoardFirst);
+        for (LayoutNode n1 : nodes1) {
+            for (LayoutNode n2 : nodes2) {
+                double ratio = regionRatio(n1, n2);
+                if(ratio >= 0.7)
+                    biPartitieGraph.setEdgeWeight(biPartitieGraph.addEdge(n1, n2), regionRatio(n1, n2));
+            }
+        }
+        MaximumWeightBipartiteMatching<LayoutNode, DefaultWeightedEdge> matching = new MaximumWeightBipartiteMatching<>(biPartitieGraph, new HashSet<>(nodes1), new HashSet<>(nodes2));
+        MatchingAlgorithm.Matching<LayoutNode, DefaultWeightedEdge> matchResult = matching.getMatching();
+        return matchResult.getWeight()/Math.min(nodes1.size(), nodes2.size());
+    }
+
+    private double regionRatio(LayoutNode n1, LayoutNode n2){
+        int r1 = Math.abs(n1.bound[0]-n1.bound[2])*Math.abs(n1.bound[1]-n1.bound[3]);
+        int r2 = Math.abs(n2.bound[0]-n2.bound[2])*Math.abs(n2.bound[1]-n2.bound[3]);
+        if(r1>r2)
+            return r2*1.0/r1;
+        return r1*1.0/r2;
     }
 
     protected Integer[] getTreeBFSHashes(){

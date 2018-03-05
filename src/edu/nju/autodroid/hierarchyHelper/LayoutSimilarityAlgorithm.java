@@ -9,4 +9,7 @@ public enum LayoutSimilarityAlgorithm {
 
     //匹配矩形区域的重叠
     RectArea,
+
+    //匹配面积占比
+    RegionRatio,
 }

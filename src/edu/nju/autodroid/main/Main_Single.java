@@ -1,9 +1,11 @@
 package edu.nju.autodroid.main;
 
 import com.android.ddmlib.*;
+import edu.nju.autodroid.androidagent.AdbAgent;
 import edu.nju.autodroid.androidagent.IAndroidAgent;
 import edu.nju.autodroid.androidagent.UiAutomationAgent;
 import edu.nju.autodroid.strategy.*;
+import edu.nju.autodroid.uiautomator.UiautomatorClient;
 import edu.nju.autodroid.utils.AdbTool;
 import edu.nju.autodroid.utils.Configuration;
 import edu.nju.autodroid.utils.Logger;
@@ -47,7 +49,7 @@ public class Main_Single {
 
 
             File apkFile = new File(apkFilePath);
-            IAndroidAgent agent = new UiAutomationAgent(device, 22233, 22233);//new AdbAgent(device, UiautomatorClient.PHONE_PORT, UiautomatorClient.PHONE_PORT);
+            IAndroidAgent agent = new AdbAgent(device, UiautomatorClient.PHONE_PORT, UiautomatorClient.PHONE_PORT);//new UiAutomationAgent(device, 22233, 22233);//new AdbAgent(device, UiautomatorClient.PHONE_PORT, UiautomatorClient.PHONE_PORT);//
             boolean result;
             result = agent.init();
             Logger.logInfo("Init agent："+result);

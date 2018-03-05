@@ -203,7 +203,17 @@ public class AdbTool {
             return false;
         String output = CmdExecutor.execCmd(Configuration.getADBPath() + " -s " + deviceSerial +  " install -r \"" + apkFile.getAbsolutePath() + "\"");
         System.out.println(output);
-        return output.contains("Success");
+        boolean success = output.contains("Success");
+        if(success){
+            List<String> permissions = getPermissionsFromApk(apkFilePath);
+            String packageName = getPackageFromApk(apkFilePath);
+            for (String permission : permissions){
+                CmdExecutor.execCmd(Configuration.getADBPath() + " shell pm grant " + packageName + " " + permission);
+            }
+
+            return true;
+        }
+        return false;
     }
 
     public static boolean unInstallApk(String deviceSerial, String packageName){
@@ -227,6 +237,27 @@ public class AdbTool {
             }
         }
         return "";
+    }
+
+    public static List<String> getPermissionsFromApk(String apkFilePath){
+        File apkFile = new File(apkFilePath);
+        if(!apkFile.exists())
+            return null;
+        List<String> permissions = new ArrayList<String>();
+        String output = CmdExecutor.execCmd(Configuration.getAaptPath() + " d permissions \"" + apkFilePath + "\"");
+        String[] lines = output.split("\n");
+        final String prefix = "uses-permission: name='";
+        for(String line : lines){
+            if(line.trim().startsWith(prefix)){
+                String permission = line.substring(prefix.length());
+                int i = permission.indexOf("'");
+                if(i>=0)
+                    permission = permission.substring(0, i);
+                if(permission.startsWith("android.permission."))
+                    permissions.add(permission);
+            }
+        }
+        return permissions;
     }
 
     public static String getLaunchableAcvivity(String apkFilePath){

@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="rtree-0.8.0.4">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/libs/rtree-0.8.0.4.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

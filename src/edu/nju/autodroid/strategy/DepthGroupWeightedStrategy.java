@@ -25,7 +25,7 @@ import java.util.function.Predicate;
  */
 public class DepthGroupWeightedStrategy implements IStrategy {
     private GroupTransaction groupTransaction = new GroupTransaction();
-    
+
     protected String runtimePackage;
     protected IAndroidAgent androidAgent;
     private Action lastAction = null;
@@ -102,16 +102,18 @@ public class DepthGroupWeightedStrategy implements IStrategy {
             int depth = 0;
             if(gl.G != Group.OutWindow)
                 gl.G.setDepth(depth);
-            while(currentSteps <= maxSteps){
+            while(currentSteps <= maxSteps && groupTransaction.getWindowSize()<=30){
                 Action action = new Action();
                 action.actionType = Action.ActionType.NoMoreAction;
                 if(unChangedCount>=MaxNoChangCount)
                     break;
+                boolean needBackToDepth = false;//返回action是否有深度要求
                 if(gl.L == null){
                     action.actionType = Action.ActionType.NoAction;
                 }
                 else if(gl.G.getDepth() >= MaxDepth){// else if(getAppWindow().size() > MaxDepth){//这里是设置深度的地方！！！//
                     action.actionType = Action.ActionType.Back;
+                    needBackToDepth = true;
                     //androidAgent.stopApplication(runtimePackage);
                     //Thread.sleep(1000);
                 }
@@ -155,6 +157,21 @@ public class DepthGroupWeightedStrategy implements IStrategy {
                     {
                         androidAgent.pressHome();
                         continue;
+                    }
+
+                    if(action.actionType == Action.ActionType.Back && needBackToDepth){
+                        //检测是否达到深度要求
+                        if(gl.G.getDepth() >= MaxDepth){// else if(getAppWindow().size() > MaxDepth){//与上面保持一致
+                            androidAgent.stopApplication(runtimePackage);
+                            Thread.sleep(1000);
+                            tryStayingCurrentApplication();
+                            gl = getCurrentGL();
+                            if(gl == null)
+                            {
+                                androidAgent.pressHome();
+                                continue;
+                            }
+                        }
                     }
                     //gl_p和gl是同一个group，那么深度不变,如果该group深度为-1（还未初始化），则置为depth
                     //否则，深度加1
