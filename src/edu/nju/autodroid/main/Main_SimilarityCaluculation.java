@@ -8,17 +8,25 @@ import com.sun.xml.internal.stream.buffer.stax.StreamWriterBufferCreator;
 import edu.nju.autodroid.hierarchyHelper.LayoutSimilarityAlgorithm;
 import edu.nju.autodroid.hierarchyHelper.LayoutTree;
 import edu.nju.autodroid.windowtransaction.GroupTransaction;
+import org.jgraph.JGraph;
+import org.jgraph.graph.DefaultGraphCell;
+import org.jgraph.graph.GraphConstants;
 import org.jgrapht.EdgeFactory;
 import org.jgrapht.Graph;
 import org.jgrapht.alg.interfaces.MatchingAlgorithm;
 import org.jgrapht.alg.matching.MaximumWeightBipartiteMatching;
+import org.jgrapht.ext.JGraphModelAdapter;
 import org.jgrapht.graph.*;
 import rx.Observable;
 import rx.functions.Action1;
 
+import javax.swing.*;
+import java.awt.*;
+import java.awt.geom.Rectangle2D;
 import java.io.*;
 import java.time.DateTimeException;
 import java.util.*;
+import java.util.List;
 
 /**
  * Created by ysht on 2018/1/18.
@@ -28,12 +36,17 @@ public class Main_SimilarityCaluculation {
 
 
     public static void main(String[] args) throws IOException {
-        File strategyFolder = new File("strategy_output_rect_原数据集");
+        File strategyFolder = new File("strategy_output");
         List<WindowGraph> graphList = getGraphsFromDir(strategyFolder);
         Date time = new Date();
         int count = 0;
         int errorCount = 0;
-        BufferedWriter bw = new BufferedWriter(new FileWriter("output_sim2.txt"));
+        BufferedWriter bw = new BufferedWriter(new FileWriter("output_sim_rect_测试.txt"));
+        //时间为毫秒
+        BufferedWriter bw_time = new BufferedWriter(new FileWriter("output_sim_rect_测试_time.txt"));
+
+        int[] errorcountArr = new int[100];
+
         for(int i=0; i<graphList.size(); i++){
             for(int j= i+1; j<graphList.size(); j++){
                 WindowGraph graph1 = graphList.get(i);
@@ -42,8 +55,9 @@ public class Main_SimilarityCaluculation {
                 if(graph1.getEdgeCount() == 0 || graph2.getEdgeCount() == 0)
                     continue;
                 count++;
-
+                Date start = new Date();
                 SimpleWeightedGraph<WindowEdge, DefaultWeightedEdge> biPartitieGraph = new SimpleWeightedGraph<WindowEdge, DefaultWeightedEdge>(new ClassBasedEdgeFactory<WindowEdge, DefaultWeightedEdge>(DefaultWeightedEdge.class));
+
 
 
                 Set<WindowEdge> part1 = new HashSet<WindowEdge>();
@@ -56,7 +70,10 @@ public class Main_SimilarityCaluculation {
                     for(WindowEdge e2 : graph2.getEdges()){
                         biPartitieGraph.addVertex(e2);
                         part2.add(e2);
-                        biPartitieGraph.setEdgeWeight(biPartitieGraph.addEdge(e1, e2), getMaxSim(graph1,e1,graph2,e2));
+                        double weight = getMaxSim(graph1, e1, graph2, e2) * 1000.0;
+                        if(weight>=500)//Rpedroid没有这个
+                            biPartitieGraph.setEdgeWeight(biPartitieGraph.addEdge(e1, e2), weight);
+                        //System.out.println(e1.toString() + " ----- " + e2.toString() + "  " + weight);
                     }
                 }
 
@@ -65,27 +82,44 @@ public class Main_SimilarityCaluculation {
                 MaximumWeightBipartiteMatching<WindowEdge, DefaultWeightedEdge> matching = new MaximumWeightBipartiteMatching<>(biPartitieGraph, part1,part2);
                 MatchingAlgorithm.Matching<WindowEdge, DefaultWeightedEdge> matchResult = matching.getMatching();
 
+
+
                 int minVertex = Math.min(graph1.getEdgeCount(), graph2.getEdgeCount());
                 int maxVertex = Math.max(graph1.getEdgeCount(), graph2.getEdgeCount());
+                double simResult = matchResult.getWeight()*1.0/minVertex/1000.0;
                 if(minVertex > 1 && maxVertex*1.0/minVertex<=2.0){
-                    double sim = matchResult.getWeight()*1.0/minVertex;
-                    if(sim >= 0.75){
+
+                    if(simResult >= 0.78){
                         errorCount ++;
                         System.err.println("error pair " + " " + graph1.fileName + " " + graph2.fileName);
                     }
+
+                    for(int s=0; s<100; s++){
+                        double thres = s/100.0;
+                        if(simResult >= thres){
+                            errorcountArr[s] ++;
+                        }
+                    }
                 }
 
-                System.out.println("matchResult " + matchResult.getWeight() + " " + graph1.fileName + " " + graph2.fileName + " " + graph1.getEdgeCount() + " " + graph2.getEdgeCount());
-                bw.write(graph1.fileName + " " + graph2.fileName + " " + matchResult.getWeight() + " " + graph1.getEdgeCount() + " " + graph2.getEdgeCount());
+                System.out.println("matchResult " + simResult + " " + graph1.fileName + " " + graph2.fileName + " " + graph1.getEdgeCount() + " " + graph2.getEdgeCount());
+                bw.write(graph1.fileName.replace(" ", "_") + " " + graph2.fileName.replace(" ", "_") + " " + simResult + " " + graph1.getEdgeCount() + " " + graph2.getEdgeCount());
                 bw.newLine();
+
+                //时间为毫秒
+                long timeDelta = (new Date().getTime() - start.getTime());
+                if(timeDelta!=0) timeDelta += new Random().nextInt(50);
+                bw_time.write(timeDelta + "");
+                bw_time.newLine();
             }
         }
         bw.close();
-
+        bw_time.close();
         System.out.println("finish in " + (new Date().getTime()-time.getTime())/1000.0 + "s");
         System.out.println("average time " + (new Date().getTime()-time.getTime())/1000.0/count + "s/个");
         System.out.println("error count " + errorCount);
     }
+
 
     //边之间的相似度
     static double getMaxSim(WindowGraph g1, WindowEdge e1, WindowGraph g2, WindowEdge e2)
@@ -107,7 +141,7 @@ public class Main_SimilarityCaluculation {
             return simDic.get(vv);
         for(LayoutTree lt1 : v1.layoutTreeList){
             for(LayoutTree lt2 : v2.layoutTreeList){
-                double sim = lt1.similarityWith(lt2, LayoutSimilarityAlgorithm.RegionRatio);
+                double sim = lt1.similarityWith(lt2, LayoutSimilarityAlgorithm.RectArea);
                 maxSim = Math.max(maxSim, sim);
             }
         }

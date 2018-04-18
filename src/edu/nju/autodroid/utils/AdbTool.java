@@ -790,6 +790,27 @@ public class AdbTool {
         return null;
     }
 
+    public static void screenCapture(IDevice device, String savedPath) throws TimeoutException, AdbCommandRejectedException, ShellCommandUnresponsiveException, IOException {
+        if(device == null)
+        {
+            Logger.logError("设备为空！");
+            return;
+        }
+
+        String[] result = new String[1];
+        device.executeShellCommand("screencap -p /sdcard/screen.png", new  IShellOutputReceiver() {
+            @Override
+            public void addOutput(byte[] arg0, int arg1, int arg2) {
+
+            }
+            @Override
+            public void flush() {}
+            @Override
+            public boolean isCancelled() {return false;}
+        });
+
+        CmdExecutor.execCmd(Configuration.getADBPath() + " pull /sdcard/screen.png " + savedPath);
+    }
 
     //获取str开头的空格个数
     private static int getPrefixSpaceLength(String str){

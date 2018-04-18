@@ -152,8 +152,63 @@ public class LayoutTree {
         return tsim[0]/count[0];
     }
 
+    protected double similarityWithByRectAreaJaccard(LayoutTree layoutTree){
+        if(layoutRTree == null){
+            createRTree();
+        }
+
+        if(layoutTree.layoutRTree == null){
+            layoutTree.createRTree();
+        }
+
+
+        int overlapArea = overlapAreaWith(layoutTree);
+        int sum = getArea() + layoutTree.getArea();
+        if(sum == 0)
+            return 0;
+        return overlapArea*1.0/(sum-overlapArea);
+    }
+
+    public int overlapAreaWith(LayoutTree other){
+        if(layoutRTree == null)
+            createRTree();
+        if(other.layoutRTree == null)
+            other.createRTree();
+
+        final LayoutTree tree1,tree2;
+        if(other.getTreeSize()<getTreeSize())
+        {
+            tree1 = other;
+            tree2 = this;
+        }
+        else {
+            tree1 = this;
+            tree2 = other;
+        }
+
+        int[] overlapArea =  new int[]{0};
+        tree1.layoutRTree.entries().subscribe(layoutNodeRectangleEntry -> {
+            tree2.layoutRTree.search(layoutNodeRectangleEntry.geometry()).subscribe(otherRect ->{
+                overlapArea[0] += Utils.getOverlapArea(layoutNodeRectangleEntry.value().bound, otherRect.value().bound);
+            });
+        });
+
+        return overlapArea[0];
+    }
+
+    public int getArea(){
+        if(layoutRTree == null)
+            createRTree();
+        int[] sum = new int[]{0};
+        layoutRTree.entries().subscribe(layoutNodeRectangleEntry -> {
+            sum[0] += layoutNodeRectangleEntry.value().getArea();
+        });
+
+        return sum[0];
+    }
+
     //不对layoutRTree是否为空进行判断。直接生成新的RTree赋给layoutRTree
-    protected RTree createRTree(){
+    public RTree createRTree(){
         layoutRTree = RTree.create();
         List<LayoutNode> leafLayoutNode = findAll(new Predicate<LayoutNode>() {
             @Override
@@ -229,12 +284,12 @@ public class LayoutTree {
             for (LayoutNode n2 : nodes2) {
                 double ratio = regionRatio(n1, n2);
                 if(ratio >= 0.7)
-                    biPartitieGraph.setEdgeWeight(biPartitieGraph.addEdge(n1, n2), regionRatio(n1, n2));
+                    biPartitieGraph.setEdgeWeight(biPartitieGraph.addEdge(n1, n2), regionRatio(n1, n2)*1000.0);
             }
         }
         MaximumWeightBipartiteMatching<LayoutNode, DefaultWeightedEdge> matching = new MaximumWeightBipartiteMatching<>(biPartitieGraph, new HashSet<>(nodes1), new HashSet<>(nodes2));
         MatchingAlgorithm.Matching<LayoutNode, DefaultWeightedEdge> matchResult = matching.getMatching();
-        return matchResult.getWeight()/Math.min(nodes1.size(), nodes2.size());
+        return matchResult.getWeight()/1000.0/Math.min(nodes1.size(), nodes2.size());
     }
 
     private double regionRatio(LayoutNode n1, LayoutNode n2){

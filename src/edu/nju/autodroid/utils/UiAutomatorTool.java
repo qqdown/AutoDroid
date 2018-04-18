@@ -63,10 +63,10 @@ public class UiAutomatorTool {
 				ois = new ObjectInputStream(mSocket.getInputStream());
 			 long milli = System.currentTimeMillis();
 			 Command cmd = (Command)ois.readObject();
-			 Logger.logInfo("Receive " + (System.currentTimeMillis()-milli)/1000.0 + "");
+			 Logger.logInfo("UiAutomatorTool Receive command" + (System.currentTimeMillis()-milli)/1000.0);
 			 return cmd;
 		} catch (ClassNotFoundException | IOException e) {
-			System.out.println("UiAutomatorTol ReceiveCommand error: PC error " + e.getMessage());
+			System.out.println("UiAutomatorTool ReceiveCommand error: PC error " + e.getMessage());
 			return null;
 		}
 	}

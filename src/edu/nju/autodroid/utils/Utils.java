@@ -252,7 +252,7 @@ public class Utils {
         int size2 = (bound2[2]-bound2[0])*(bound2[3]-bound2[1]);
         if(size1<=0 || size2<=0)
             return  0;
-        return overlapSize*1.0/(Math.max(size1,size2));
+        return overlapSize*1.0/(size1+size2-overlapSize);
     }
 
 }

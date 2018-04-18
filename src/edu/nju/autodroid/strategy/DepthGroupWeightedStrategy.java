@@ -35,7 +35,7 @@ public class DepthGroupWeightedStrategy implements IStrategy {
     private Logger actionLogger = null;
     private  int lastGraphVetexCount = 0;
     private  int lastGraphEdgeCount = 0;
-    private int MaxDepth = 1;
+    private int MaxDepth = 4;
     private double layoutSimThreashold = 0.9;
 
 
@@ -102,7 +102,7 @@ public class DepthGroupWeightedStrategy implements IStrategy {
             int depth = 0;
             if(gl.G != Group.OutWindow)
                 gl.G.setDepth(depth);
-            while(currentSteps <= maxSteps && groupTransaction.getWindowSize()<=30){
+            while(currentSteps <= maxSteps){
                 Action action = new Action();
                 action.actionType = Action.ActionType.NoMoreAction;
                 if(unChangedCount>=MaxNoChangCount)

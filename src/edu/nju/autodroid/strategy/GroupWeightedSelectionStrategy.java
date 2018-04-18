@@ -145,11 +145,13 @@ public class GroupWeightedSelectionStrategy implements IStrategy{
                     }
                 }
 
+                if(action.actionType == Action.ActionType.NoAction){
+                    unChangedCount++;
+                    action.actionType = Action.ActionType.Back;
+                }
+
                 if(action.actionType == Action.ActionType.NoMoreAction)
                     break;
-                else if(action.actionType == Action.ActionType.NoAction){
-                    unChangedCount++;
-                }
                 else{
                     doAction(action);
                     GL<Group> gl_p = gl;

@@ -136,4 +136,8 @@ public class LayoutNode {
         return 0;//不同
     }
 
+    public int getArea(){
+        return Math.abs((bound[0]-bound[2])*(bound[1]-bound[3]));
+    }
+
 }

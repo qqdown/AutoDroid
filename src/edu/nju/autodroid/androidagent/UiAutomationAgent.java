@@ -111,7 +111,7 @@ public class UiAutomationAgent implements IAndroidAgent {
                 ois = new ObjectInputStream(mSocket.getInputStream());
             long milli = System.currentTimeMillis();
             Command cmd = (Command)ois.readObject();
-            Logger.logInfo("Receive " + (System.currentTimeMillis()-milli)/1000.0 + "");
+            Logger.logInfo("UiAutomationAgent Receive " + (System.currentTimeMillis()-milli)/1000.0 );
             return cmd;
         } catch (ClassNotFoundException | IOException e) {
             System.out.println("UiAutomationAgent ReceiveCommand error: PC error " + e.getMessage());

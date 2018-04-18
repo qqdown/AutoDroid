@@ -94,6 +94,11 @@ public class Configuration {
         return toLegalPath(directory.getAbsolutePath());
     }
 
+    public static String getJarSignerPath(){
+        return prop.getProperty("jarsigner");
+    }
+
+
     public static String getDotAndroidPath(){
         return prop.getProperty("dot_android_path");
     }
