@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="jgrapht-ext-1.1.0-uber">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/libs/jgrapht-ext-1.1.0-uber.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

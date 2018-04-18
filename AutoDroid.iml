@@ -27,5 +27,9 @@
     <orderEntry type="library" name="rxjava-1.3.4" level="project" />
     <orderEntry type="library" name="guava-mini-0.1.1" level="project" />
     <orderEntry type="library" name="jgrapht-core-1.1.0" level="project" />
+    <orderEntry type="library" name="apktool" level="project" />
+    <orderEntry type="library" name="dom4j-2.1.0" level="project" />
+    <orderEntry type="library" name="jgraphx-3.9.3" level="project" />
+    <orderEntry type="library" name="jgrapht-ext-1.1.0-uber" level="project" />
   </component>
 </module>
