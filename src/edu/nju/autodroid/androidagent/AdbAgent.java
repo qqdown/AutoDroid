@@ -53,7 +53,105 @@ public class AdbAgent extends UiAutomatorAndroidAgent {
         return true;
     }
 
-/*    @Override
+    @Override
+    public boolean doLongClick(LayoutNode btn) {
+        if(btn == null)
+            return false;
+        int[] bound = btn.bound;
+        int x = (bound[0]+bound[2])/2;
+        int y = (bound[1]+bound[3])/2;
+        try {
+            AdbTool.doLongPress(device, x, y, 1500);
+        } catch (TimeoutException | AdbCommandRejectedException | IOException | ShellCommandUnresponsiveException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean doSwipeToLeft(LayoutNode node) {
+        if(node == null)
+            return false;
+        int[] bound = node.bound;
+        int x = (bound[0]+bound[2])/2;
+        int y = (bound[1]+bound[3])/2;
+        int tx = x-1000;
+        if(tx<0) tx = 0;
+        int ty = y;
+
+        try {
+            AdbTool.doSwipe(device, x, y, tx,ty);
+        } catch (TimeoutException | AdbCommandRejectedException | IOException | ShellCommandUnresponsiveException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean doSwipeToRight(LayoutNode node) {
+        if(node == null)
+            return false;
+        int[] bound = node.bound;
+        int x = (bound[0]+bound[2])/2;
+        int y = (bound[1]+bound[3])/2;
+        int tx = x+1000;
+        if(tx>=1080) tx = 1080;
+        int ty = y;
+
+        try {
+            AdbTool.doSwipe(device, x, y, tx,ty);
+        } catch (TimeoutException | AdbCommandRejectedException | IOException | ShellCommandUnresponsiveException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean doScrollForward(LayoutNode node, int steps) {
+        if(node == null)
+            return false;
+        int[] bound = node.bound;
+        int x = (bound[0]+bound[2])/2;
+        int y = (bound[1]+bound[3])/2;
+        int tx = x;
+        int ty = y + 1000;
+        if(ty>=1920) ty = 1920;
+
+
+        try {
+            AdbTool.doSwipe(device, x, y, tx,ty);
+        } catch (TimeoutException | AdbCommandRejectedException | IOException | ShellCommandUnresponsiveException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean doScrollBackward(LayoutNode node, int steps) {
+        if(node == null)
+            return false;
+        int[] bound = node.bound;
+        int x = (bound[0]+bound[2])/2;
+        int y = (bound[1]+bound[3])/2;
+        int tx = x;
+        int ty = y-1000;
+        if(ty<0) ty =0;
+
+
+        try {
+            AdbTool.doSwipe(device, x, y, tx,ty);
+        } catch (TimeoutException | AdbCommandRejectedException | IOException | ShellCommandUnresponsiveException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    /*    @Override
     public String getLayout() {
 
         try {

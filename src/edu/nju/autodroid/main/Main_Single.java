@@ -65,7 +65,7 @@ public class Main_Single {
 
                 if(!laubchableActivity.endsWith("/")) {
                     String apkName = apkFile.getName().substring(0, apkFile.getName().lastIndexOf('.'));
-                    IStrategy strategy = new DepthGroupWeightedStrategy(agent, Configuration.getMaxStep(), laubchableActivity, new Logger(apkName, "logger_output\\" + apkName + ".txt"));//"com.financial.calculator/.FinancialCalculators"
+                    IStrategy strategy = new GroupWeightedSelectionStrategy(agent, Configuration.getMaxStep(), laubchableActivity, new Logger(apkName, "logger_output\\" + apkName + ".txt"));//"com.financial.calculator/.FinancialCalculators"
                     Logger.logInfo("Start Strategy：" + strategy.getStrategyName());
                     Logger.logInfo("Strategy target：" + apkFilePath);
                     try{

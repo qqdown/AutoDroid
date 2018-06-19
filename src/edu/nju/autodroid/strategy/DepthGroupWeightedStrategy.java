@@ -225,6 +225,7 @@ public class DepthGroupWeightedStrategy implements IStrategy {
                     gl = getCurrentGL();
                     if(gl.G.getDepth()<0){
                         System.out.println("error depth");
+                        unChangedCount++;
                     }
                 }else{
                     Logger.logInfo(androidAgent.getDevice().getSerialNumber() + " 已经跳出当前package");

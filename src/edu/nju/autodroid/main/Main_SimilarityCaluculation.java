@@ -36,22 +36,38 @@ public class Main_SimilarityCaluculation {
 
 
     public static void main(String[] args) throws IOException {
-        File strategyFolder = new File("strategy_output");
+        File strategyFolder = new File("D:\\IDEAProject\\AutoDroid\\AutoDroid\\strategy_output_rect_fdroid");
+        //统计节点个数
         List<WindowGraph> graphList = getGraphsFromDir(strategyFolder);
+        int[] distribution = new int[10];
+        for(WindowGraph graph : graphList){
+            System.out.println(graph.vertexMap.size());
+            int i = (graph.vertexMap.size()+1)/10;
+            distribution[i]++;
+        }
+        for(int i=0; i<10; i++){
+            System.out.println(i+ " " + distribution[i]);
+        }
+
+        /*
+        File strategyFolder2 = new File("strategy_output_rect_fdroid");
+        List<WindowGraph> graphList = getGraphsFromDir(strategyFolder);
+        List<WindowGraph> graphList2 = getGraphsFromDir(strategyFolder2);
         Date time = new Date();
         int count = 0;
         int errorCount = 0;
-        BufferedWriter bw = new BufferedWriter(new FileWriter("output_sim_rect_测试.txt"));
+        BufferedWriter bw = new BufferedWriter(new FileWriter("output_sim_rect_enc.txt"));
         //时间为毫秒
-        BufferedWriter bw_time = new BufferedWriter(new FileWriter("output_sim_rect_测试_time.txt"));
+        BufferedWriter bw_time = new BufferedWriter(new FileWriter("output_sim_rect_enc_time.txt"));
 
         int[] errorcountArr = new int[100];
 
         for(int i=0; i<graphList.size(); i++){
-            for(int j= i+1; j<graphList.size(); j++){
+            for(int j= 0; j<graphList2.size(); j++){
                 WindowGraph graph1 = graphList.get(i);
-                WindowGraph graph2 = graphList.get(j);
-
+                WindowGraph graph2 = graphList2.get(j);
+                if(!graph1.fileName.equals(graph2.fileName) && !graph1.fileName.contains(graph2.fileName) && !graph2.fileName.contains(graph1.fileName))
+                    continue;
                 if(graph1.getEdgeCount() == 0 || graph2.getEdgeCount() == 0)
                     continue;
                 count++;
@@ -71,8 +87,8 @@ public class Main_SimilarityCaluculation {
                         biPartitieGraph.addVertex(e2);
                         part2.add(e2);
                         double weight = getMaxSim(graph1, e1, graph2, e2) * 1000.0;
-                        if(weight>=500)//Rpedroid没有这个
-                            biPartitieGraph.setEdgeWeight(biPartitieGraph.addEdge(e1, e2), weight);
+                        //if(weight>=500)//Rpedroid没有这个
+                        biPartitieGraph.setEdgeWeight(biPartitieGraph.addEdge(e1, e2), weight);
                         //System.out.println(e1.toString() + " ----- " + e2.toString() + "  " + weight);
                     }
                 }
@@ -117,7 +133,7 @@ public class Main_SimilarityCaluculation {
         bw_time.close();
         System.out.println("finish in " + (new Date().getTime()-time.getTime())/1000.0 + "s");
         System.out.println("average time " + (new Date().getTime()-time.getTime())/1000.0/count + "s/个");
-        System.out.println("error count " + errorCount);
+        System.out.println("error count " + errorCount);*/
     }
 
 

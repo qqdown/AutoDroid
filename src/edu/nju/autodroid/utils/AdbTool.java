@@ -667,7 +667,6 @@ public class AdbTool {
      * @throws ShellCommandUnresponsiveException
      * @throws IOException
      */
-    @Deprecated
     public static void doLongPress(IDevice device, int x, int y, int duration) throws TimeoutException, AdbCommandRejectedException, ShellCommandUnresponsiveException, IOException {
         if(device == null)
         {

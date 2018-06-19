@@ -127,12 +127,22 @@ public class LayoutTree {
         }
         double[] tsim = new double[1];
         int[] count = new int[1];
-        layoutTree.layoutRTree.entries().subscribe(new Action1<Entry<LayoutNode, Rectangle>>() {
+        RTree minRtree, maxRTree;
+        if(layoutTree.layoutRTree.size()<layoutRTree.size())
+        {
+            minRtree = layoutTree.layoutRTree;
+            maxRTree = layoutRTree;
+        }
+        else{
+            maxRTree = layoutTree.layoutRTree;
+            minRtree = layoutRTree;
+        }
+        minRtree.entries().subscribe(new Action1<Entry<LayoutNode, Rectangle>>() {
             @Override
             public void call(Entry<LayoutNode, Rectangle> otherEntry) {
                 //对每个，查找覆盖的元素
                 double[] maxSim = new double[]{0};
-                layoutRTree.search(otherEntry.geometry()).subscribe(new Action1<Entry<LayoutNode, Rectangle>>() {
+                maxRTree.search(otherEntry.geometry()).subscribe(new Action1<Entry<LayoutNode, Rectangle>>() {
                     @Override
                     public void call(Entry<LayoutNode, Rectangle> myEntry) {
                         //找到有重叠的区域，那么则计算覆盖率
@@ -149,7 +159,7 @@ public class LayoutTree {
         if(count[0]== 0)
             return 0;
 
-        return tsim[0]/count[0];
+        return tsim[0]/minRtree.size();
     }
 
     protected double similarityWithByRectAreaJaccard(LayoutTree layoutTree){
@@ -213,7 +223,7 @@ public class LayoutTree {
         List<LayoutNode> leafLayoutNode = findAll(new Predicate<LayoutNode>() {
             @Override
             public boolean test(LayoutNode node) {
-                return node.getChildrenCount() == 0;
+                return node.getChildrenCount() <= 1;
             }
         }, TreeSearchOrder.DepthFirst);
 
@@ -250,11 +260,11 @@ public class LayoutTree {
         int[] match = new int[maxSize];
         for(int i=0; i<nodes1.size(); i++){
             for(int j=0; j<nodes2.size(); j++){
-                weight[i][j] = Utils.getNormalizedOverlapArea(nodes1.get(i).bound, nodes2.get(j).bound);
+                weight[i][j] = Utils.getNormalizedOverlapArea(nodes1.get(i).bound, nodes2.get(j).bound)*1000.0;
             }
         }
         double sim = Utils.biGraph(true, weight, match)*1.0/Math.max(nodes1.size(), nodes2.size());
-        return sim;
+        return sim/1000.0;
     }
 
     //先将每个控件按照面积排序，然后用二分图匹配，权值就是面积比（小/大）

@@ -24,7 +24,7 @@ import java.util.function.Predicate;
  */
 public class GroupWeightedSelectionStrategy implements IStrategy{
     private GroupTransaction groupTransaction = new GroupTransaction();
-
+    private LayoutSimilarityAlgorithm similarityAlgorithm = LayoutSimilarityAlgorithm.BFSThenEditdistane;
     protected String runtimePackage;
     protected IAndroidAgent androidAgent;
     private Action lastAction = null;
@@ -283,7 +283,7 @@ public class GroupWeightedSelectionStrategy implements IStrategy{
                 gl.L = lc;
                 newGroup.addLayout(lc);
             } else {
-                double sim = lc.similarityWith(gl.L);
+                double sim = lc.similarityWith(gl.L, similarityAlgorithm);
                 if (sim >= 0.99) {
                     return gl;
                 } else if (sim >= similarityThreshold) {
@@ -309,7 +309,7 @@ public class GroupWeightedSelectionStrategy implements IStrategy{
         GL gl = new GL();
         for(Group win : groupTransaction.getWindows()){
             for(LayoutTree l :win.getLayouts()){
-                double sim = l.similarityWith(lc);
+                double sim = l.similarityWith(lc, similarityAlgorithm);
                 if(sim>max){
                     gl.L = l;
                     gl.G = win;

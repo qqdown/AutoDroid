@@ -50,21 +50,25 @@ public class Main_ApiBirthmark {
                     AdbTool.startActivity(device, laubchableActivity);
                     Thread.sleep(1000);
                     int pid = -1;
-                    while ((pid = getTaskID(device, packageName)) == -1) {
+                    int tryCount = 0;
+                    while ((pid = getTaskID(device, packageName)) == -1 && tryCount<=30) {
                         Thread.sleep(1000);//等待启动
+                        tryCount++;
                     }
-                    System.out.println(pid);
-                    Thread.sleep(1000);
-                    CmdExecutor.execCmd("adb shell am profile " + pid + " start /mnt/sdcard/bmark.trace");
-                    Thread.sleep(1000);
-                    CmdExecutor.execCmd("adb shell monkey -p " + packageName + " -s 100 --ignore-crashes --ignore-security-exceptions 500");
-                    Thread.sleep(1000);
-                    CmdExecutor.execCmd("adb shell am profile " + pid + " stop");
-                    Thread.sleep(1000);
-                    File outputDir = new File("outputTrace/" + apkName);
-                    if (!outputDir.exists())
-                        outputDir.mkdirs();
-                    CmdExecutor.execCmd("adb pull /mnt/sdcard/bmark.trace " + outputDir.getAbsolutePath());
+                    if(pid != -1) {
+                        System.out.println(pid);
+                        Thread.sleep(1000);
+                        CmdExecutor.execCmd("adb shell am profile " + pid + " start /mnt/sdcard/bmark.trace");
+                        Thread.sleep(1000);
+                        CmdExecutor.execCmd("adb shell monkey -p " + packageName + " -s 100 --ignore-crashes --ignore-security-exceptions 500");
+                        Thread.sleep(1000);
+                        CmdExecutor.execCmd("adb shell am profile " + pid + " stop");
+                        Thread.sleep(1000);
+                        File outputDir = new File("outputTrace/" + apkName);
+                        if (!outputDir.exists())
+                            outputDir.mkdirs();
+                        CmdExecutor.execCmd("adb pull /mnt/sdcard/bmark.trace " + outputDir.getAbsolutePath());
+                    }
                 }else{
                     Logger.logInfo("无法获取Launchable Activity");
                 }
